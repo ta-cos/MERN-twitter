@@ -1,3 +1,4 @@
+const { setTokenCookie, restoreUser } = require('../../utils/auth');
 const validateRegisterInput = require('../../validation/register');
 const validateLoginInput = require('../../validation/login');
 const User = require('../../models/User');
@@ -9,12 +10,12 @@ const router = express.Router();
 
 
 router.get('/current', (req, res, next) => {
-        res.json({
-            id: req.user.id,
-            handle: req.user.handle,
-            email: req.user.email
-        });
-    })
+    res.json({
+        id: req.user.id,
+        handle: req.user.handle,
+        email: req.user.email
+    });
+})
 
 router.post('/register', async (req, res, next) => {
     // Check to make sure nobody has already registered with a duplicate email
@@ -60,19 +61,11 @@ router.post('/login', async (req, res, next) => {
     const isMatch = await bcrypt.compare(password, user.password)
 
     if (isMatch) {
-        const payload = { id: user.id, handle: user.handle };
+        await setTokenCookie(res, user);
 
-        jwt.sign(
-            payload,
-            keys.secretOrKey,
-            // Tell the key to expire in one hour
-            { expiresIn: 3600 },
-            (err, token) => {
-                res.json({
-                    message: "Successfull login",
-                    token: "Bearer " + token
-                });
-            });
+        return res.json({
+            user: user
+        });
     } else {
         return res.status(400).json({
             error: 'Incorrect password'
