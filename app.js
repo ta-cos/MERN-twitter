@@ -4,7 +4,6 @@ require('./config/passport')(passport);
 const express = require("express");
 const routes = require('./routes')
 const app = express();
-app.use(passport.initialize());
 
 const db = require('./config/keys').mongoURI;
 mongoose
@@ -12,6 +11,7 @@ mongoose
     .then(() => console.log("Connected to MongoDB successfully"))
     .catch(err => console.log(err));
 
+app.use(passport.initialize());
 app.use(express.json());
 app.use('/', routes);
 
