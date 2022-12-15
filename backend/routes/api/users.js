@@ -1,3 +1,4 @@
+const { setTokenCookie, requireAuth } = require('../../utils/auth');
 const validateRegisterInput = require('../../validation/register');
 const validateLoginInput = require('../../validation/login');
 const User = require('../../models/User');
@@ -9,12 +10,12 @@ const router = express.Router();
 
 
 router.get('/current', (req, res, next) => {
-        res.json({
-            id: req.user.id,
-            handle: req.user.handle,
-            email: req.user.email
-        });
-    })
+    res.json({
+        id: req.user.id,
+        handle: req.user.handle,
+        email: req.user.email
+    });
+})
 
 router.post('/register', async (req, res, next) => {
     // Check to make sure nobody has already registered with a duplicate email
@@ -38,6 +39,7 @@ router.post('/register', async (req, res, next) => {
                 if (err) next(err);
                 newUser.password = hash;
                 const user = await newUser.save()
+                await setTokenCookie(res, user);
                 return res.json({
                     id: user.id,
                     handle: user.handle,
