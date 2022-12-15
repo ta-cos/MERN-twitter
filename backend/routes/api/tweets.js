@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const passport = require('passport');
 
 const Tweet = require('../../models/Tweet');
 const validateTweetInput = require('../../validation/tweets');
@@ -31,29 +30,34 @@ router.get('/:id', (req, res) => {
 });
 
 
-router.post('/',
-    passport.authenticate('jwt', { session: false }),
-    (req, res) => {
-        const { errors, isValid } = validateTweetInput(req.body);
+router.post('/', (req, res) => {
+    const { errors, isValid } = validateTweetInput(req.body);
 
-        if (!isValid) {
-            return res.status(400).json(errors);
-        }
-
-        const newTweet = new Tweet({
-            text: req.body.text,
-            user: req.user.id
-        });
-
-        newTweet.save().then(tweet => res.json(tweet));
+    if (!isValid) {
+        return res.status(400).json(errors);
     }
+
+    const newTweet = new Tweet({
+        text: req.body.text,
+        user: req.user.id
+    });
+
+    newTweet.save().then(tweet => res.json(tweet));
+}
 );
 
-router.put('/:id', (req, res, next) => {
+router.put('/:id', async (req, res, next) => {
+    const query = { id: req.params.id }
 
+    const editTweet = await Tweet.findOneAndUpdate(query,
+        {
+            text: req.body.text,
+        });
+    if (!editTweet) res.status(404).json("Comment not found")
+    res.json({ message: "Successfully Updated Tweet" })
 })
 
-router.delete(':/id', (req, res, next) => {
+router.delete(':/id', async (req, res, next) => {
 
 })
 
