@@ -4,12 +4,9 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const keys = require('../config/keys');
 
-console.log('!!!!!!!!!')
-
 const options = {};
 options.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 options.secretOrKey = keys.secretOrKey;
-console.log(options)
 module.exports = passport => {
     passport.use(new JwtStrategy(options, (jwt_payload, done) => {
         // This payload includes the items we specified earlier
