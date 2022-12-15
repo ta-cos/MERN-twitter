@@ -1,8 +1,7 @@
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose")
-const users = require("./routes/api/users");
-const tweets = require("./routes/api/tweets");
+const routes = require('./routes')
 
 
 app.get("/", (req, res) => res.send("Hello World"));
@@ -14,8 +13,7 @@ mongoose
     .catch(err => console.log(err));
 
 app.use(express.json());
-app.use("/api/users", users);
-app.use("/api/tweets", tweets);
+app.use('/', routes);
 
 
 const port = process.env.PORT || 8000;
