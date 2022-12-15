@@ -1,10 +1,9 @@
 const User = require('../../models/User');
+const keys = require('../../config/keys');
+const jwt = require('jsonwebtoken');
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const router = express.Router();
-
-router.get("/test", (req, res) =>
-    res.json({ msg: "This is the users route" }));
 
 router.post('/register', async (req, res, next) => {
     // Check to make sure nobody has already registered with a duplicate email
@@ -32,6 +31,25 @@ router.post('/register', async (req, res, next) => {
             })
         })
     }
+})
+
+router.post('/login', async (req, res, next) => {
+    const { email, password } = req.body
+
+    const user = await User.findOne({ email })
+
+    if (!user) {
+        return res.status(404).json({ email: 'This user does not exist' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password)
+
+    if (isMatch) {
+        res.json({ msg: 'Success' });
+    } else {
+        return res.status(400).json({ password: 'Incorrect password' });
+    }
+
 })
 
 module.exports = router;
