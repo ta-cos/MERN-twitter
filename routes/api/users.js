@@ -8,18 +8,15 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const router = express.Router();
 
-router.get('/test',  (req, res, next) => {
-        res.json({ message: 'test successful' })
-    })
 
 router.get('/current', passport.authenticate(
     'jwt', { session: false }), (req, res, next) => {
-    res.json({
-        id: req.user.id,
-        handle: req.user.handle,
-        email: req.user.email
-    });
-})
+        res.json({
+            id: req.user.id,
+            handle: req.user.handle,
+            email: req.user.email
+        });
+    })
 
 router.post('/register', async (req, res, next) => {
     // Check to make sure nobody has already registered with a duplicate email
