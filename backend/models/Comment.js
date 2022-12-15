@@ -17,4 +17,4 @@ const CommentSchema = new Schema({
     }
 });
 
-module.exports = Tweet = mongoose.model('tweet', TweetSchema);
+module.exports = Comment = mongoose.model('comment', CommentSchema);

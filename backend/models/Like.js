@@ -20,4 +20,4 @@ const LikeSchema = new Schema({
     }
 });
 
-module.exports = Tweet = mongoose.model('tweet', TweetSchema);
+module.exports = Like = mongoose.model('like', LikeSchema);
