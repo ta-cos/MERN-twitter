@@ -62,19 +62,11 @@ router.post('/login', async (req, res, next) => {
     const isMatch = await bcrypt.compare(password, user.password)
 
     if (isMatch) {
-        const payload = { id: user.id, handle: user.handle };
+        await setTokenCookie(res, user);
 
-        jwt.sign(
-            payload,
-            keys.secretOrKey,
-            // Tell the key to expire in one hour
-            { expiresIn: 3600 },
-            (err, token) => {
-                res.json({
-                    message: "Successfull login",
-                    token: "Bearer " + token
-                });
-            });
+        return res.json({
+            user: user
+        });
     } else {
         return res.status(400).json({
             error: 'Incorrect password'
