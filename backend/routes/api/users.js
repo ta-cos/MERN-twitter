@@ -1,23 +1,20 @@
+const validateRegisterInput = require('../../validation/register');
+const validateLoginInput = require('../../validation/login');
 const User = require('../../models/User');
 const keys = require('../../config/keys');
-const passport = require('passport');
 const jwt = require('jsonwebtoken');
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const router = express.Router();
 
-router.get('/test',  (req, res, next) => {
-        res.json({ message: 'test successful' })
-    })
 
-router.get('/current', passport.authenticate(
-    'jwt', { session: false }), (req, res, next) => {
-    res.json({
-        id: req.user.id,
-        handle: req.user.handle,
-        email: req.user.email
-    });
-})
+router.get('/current', (req, res, next) => {
+        res.json({
+            id: req.user.id,
+            handle: req.user.handle,
+            email: req.user.email
+        });
+    })
 
 router.post('/register', async (req, res, next) => {
     // Check to make sure nobody has already registered with a duplicate email
@@ -41,7 +38,11 @@ router.post('/register', async (req, res, next) => {
                 if (err) next(err);
                 newUser.password = hash;
                 const user = await newUser.save()
-                return res.json(user)
+                return res.json({
+                    id: user.id,
+                    handle: user.handle,
+                    email: user.email,
+                })
             })
         })
     }
@@ -53,7 +54,7 @@ router.post('/login', async (req, res, next) => {
     const user = await User.findOne({ email })
 
     if (!user) {
-        return res.status(404).json({ email: 'This user does not exist' });
+        return res.status(404).json({ error: 'This user does not exist' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password)
@@ -74,7 +75,7 @@ router.post('/login', async (req, res, next) => {
             });
     } else {
         return res.status(400).json({
-            password: 'Incorrect password'
+            error: 'Incorrect password'
         });
     }
 
