@@ -1,10 +1,10 @@
+const mongoose = require("mongoose");
+const passport = require('passport');
+require('./config/passport')(passport);
 const express = require("express");
-const app = express();
-const mongoose = require("mongoose")
 const routes = require('./routes')
-
-
-app.get("/", (req, res) => res.send("Hello World"));
+const app = express();
+app.use(passport.initialize());
 
 const db = require('./config/keys').mongoURI;
 mongoose

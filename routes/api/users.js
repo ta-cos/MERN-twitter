@@ -1,9 +1,23 @@
 const User = require('../../models/User');
 const keys = require('../../config/keys');
+const passport = require('passport');
 const jwt = require('jsonwebtoken');
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const router = express.Router();
+
+router.get('/test',  (req, res, next) => {
+        res.json({ message: 'test successful' })
+    })
+
+router.get('/current', passport.authenticate(
+    'jwt', { session: false }), (req, res, next) => {
+    res.json({
+        id: req.user.id,
+        handle: req.user.handle,
+        email: req.user.email
+    });
+})
 
 router.post('/register', async (req, res, next) => {
     // Check to make sure nobody has already registered with a duplicate email
@@ -55,7 +69,7 @@ router.post('/login', async (req, res, next) => {
             (err, token) => {
                 res.json({
                     message: "Successfull login",
-                    token: token
+                    token: "Bearer " + token
                 });
             });
     } else {
