@@ -75,4 +75,9 @@ router.post('/login', async (req, res, next) => {
 
 })
 
+router.delete('/logout', (_req, res, next) => {
+    res.clearCookie('token');
+    return res.json({ message: 'success' });
+})
+
 module.exports = router;
