@@ -23,9 +23,11 @@ router.post('/register', validateRegisterInput, async (req, res, next) => {
     const user = await User.findOne({ email })
     if (user) {
         // Throw a 400 error if the email address already exists
-        return res.status(400).json({
-            email: "A user has already registered with this email address"
-        })
+        const err = {}
+        err.status = 400
+        err.title = 'Validation Error'
+        err.errors = ["A user has already registered with this email address"]
+        next(err)
     } else {
         // Otherwise create a new user
         const newUser = new User({
@@ -56,7 +58,11 @@ router.post('/login', validateLoginInput, async (req, res, next) => {
     const user = await User.findOne({ email })
 
     if (!user) {
-        return res.status(404).json({ error: 'This user does not exist' });
+        const err = {}
+        err.status = 400
+        err.title = 'Validation Error'
+        err.errors = [`The email ${email} is not associated with a user`]
+        next(err)
     }
 
     const isMatch = await bcrypt.compare(password, user.password)
@@ -68,9 +74,11 @@ router.post('/login', validateLoginInput, async (req, res, next) => {
             user: user
         });
     } else {
-        return res.status(400).json({
-            error: 'Incorrect password'
-        });
+        const err = {}
+        err.status = 400
+        err.title = 'Validation Error'
+        err.errors = [`Login information does not match our records`]
+        next(err)
     }
 
 })
