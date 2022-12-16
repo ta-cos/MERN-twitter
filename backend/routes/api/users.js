@@ -17,7 +17,7 @@ router.get('/current', (req, res, next) => {
     });
 })
 
-router.post('/register', async (req, res, next) => {
+router.post('/register', validateRegisterInput, async (req, res, next) => {
     // Check to make sure nobody has already registered with a duplicate email
     const { handle, email, password } = req.body;
     const user = await User.findOne({ email })
@@ -50,7 +50,7 @@ router.post('/register', async (req, res, next) => {
     }
 })
 
-router.post('/login', async (req, res, next) => {
+router.post('/login', validateLoginInput, async (req, res, next) => {
     const { email, password } = req.body
 
     const user = await User.findOne({ email })
