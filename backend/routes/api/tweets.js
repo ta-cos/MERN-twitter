@@ -10,11 +10,7 @@ router.get('/', (req, res) => {
         .catch(err => res.status(404).json({ notweetsfound: 'No tweets found' }));
 });
 
-router.post('/', validateTweetInput, (req, res) => {
-
-    if (!isValid) {
-        return res.status(400).json(errors);
-    }
+router.post('/', validateTweetInput, (req, res, next) => {
 
     const newTweet = new Tweet({
         text: req.body.text,
