@@ -11,13 +11,13 @@ router.post('/', validateTweetInput, async (req, res, next) => {
         user: req.user.id
     });
 
-    return res.json({ id: tweet.id, text: tweet.text, user: tweet.user })
+    return res.json(tweet)
 });
 
 router.get('/', async (req, res, next) => {
     const tweets = await Tweet.find()
         .sort({ date: -1 })
-        .populate('comment')
+
 
     if (!tweets.length) {
         const err = {}
@@ -31,7 +31,7 @@ router.get('/', async (req, res, next) => {
 });
 
 router.get('/current', async (req, res, next) => {
-    const myTweets = await Tweet.find({ user: req.user.id })
+    const myTweets = await Tweet.find({ user: req.user.id }).populate()
 
     if (!myTweets) {
         const err = {}
@@ -43,7 +43,7 @@ router.get('/current', async (req, res, next) => {
 });
 
 router.get('/:tweetId', async (req, res, next) => {
-    const tweet = await Tweet.findById(req.params.tweetId)
+    const tweet = await Tweet.findById(req.params.tweetId).populate()
 
     if (!tweet) {
         const err = {}
@@ -56,7 +56,7 @@ router.get('/:tweetId', async (req, res, next) => {
 
 router.put('/:tweetId', validateTweetInput, async (req, res, next) => {
     const query = { id: req.params.id, user: req.user.id }
-    const editTweet = await Tweet.findOne(query).select('id', 'text')
+    const editTweet = await Tweet.findOne(query)
 
     if (!editTweet) {
         const err = {}
@@ -87,5 +87,6 @@ router.delete('/:tweetId', async (req, res, next) => {
         return res.json(deleteTweet)
     }
 })
+
 
 module.exports = router;
