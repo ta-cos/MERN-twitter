@@ -31,7 +31,8 @@ router.get('/', async (req, res, next) => {
 });
 
 router.get('/current', async (req, res, next) => {
-    const myTweets = await Tweet.find({ user: req.user.id }).populate()
+    const myTweets = await Tweet.find({ user: req.user.id })
+        .populate()
 
     if (!myTweets) {
         const err = {}
@@ -43,10 +44,19 @@ router.get('/current', async (req, res, next) => {
 });
 
 router.get('/:tweetId', async (req, res, next) => {
-    const tweet = await Tweet.findById(req.params.tweetId).populate()
+    const err = {}
 
+    const tweet = await Tweet.findById(req.params.tweetId)
+        .populate()
+        .catch((e) => {
+            err.title = 'Bad Request'
+            err.message = e.message
+            err.status = 400
+            err.errors = ["Invalid Tweet Id"]
+            next(err)
+        })
+    //.catch will catch any erreros that arise becuase of type casting for findById
     if (!tweet) {
-        const err = {}
         err.title = 'Not Found'
         err.status = 404
         err.errors = ["Tweet Not Found"]
@@ -55,11 +65,16 @@ router.get('/:tweetId', async (req, res, next) => {
 });
 
 router.put('/:tweetId', validateTweetInput, async (req, res, next) => {
-    const query = { id: req.params.id, user: req.user.id }
-    const editTweet = await Tweet.findOne(query)
-
-    if (!editTweet) {
-        const err = {}
+    const err = {}
+    const editTweet = await Tweet.findById(req.params.tweetId)
+        .populate()
+    console.log(editTweet.user)
+    if (req.user.id == editTweet.user) {
+        err.title = 'Not Found'
+        err.status = 404
+        err.errors = ["Tweet Not Found"]
+        next(err)
+    } else if (!editTweet) {
         err.title = 'Not Found'
         err.status = 404
         err.errors = ["Tweet Not Found"]
@@ -67,15 +82,24 @@ router.put('/:tweetId', validateTweetInput, async (req, res, next) => {
     } else {
         editTweet.text = req.body.text
         await editTweet.save()
+        console.log(editTweet)
         return res.json(editTweet)
     }
 })
 
 router.delete('/:tweetId', async (req, res, next) => {
+    const err = {}
+
     const tweet = await Tweet.findById(req.params.tweetId)
+        .catch((e) => {
+            err.title = 'Bad Request'
+            err.message = e.message
+            err.status = 400
+            err.errors = ["Invalid Tweet Id"]
+            next(err)
+        })
 
     if (!tweet) {
-        const err = {}
         err.title = 'Not Found'
         err.status = 404
         err.errors = ["Tweet Not Found"]

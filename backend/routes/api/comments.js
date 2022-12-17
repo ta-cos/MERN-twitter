@@ -5,18 +5,16 @@ const router = express.Router();
 
 router.post('/:tweetId', async (req, res, next) => {
     const tweetId = req.params.tweetId
-    const tweet = await Tweet.findOne({ id: tweetId })
-    console.log(tweet)
-    console.log(tweet.comments)
+    const tweet = await Tweet.findById(tweetId)
+        .catch()
+
     if (!tweet) return res.status(404).json({ error: 'Tweet not found' })
 
-    const newComment = new Comment({
+    const newComment = await Comment.create({
         text: req.body.text,
         tweet: tweetId
     });
 
-
-    await newComment.save()
     tweet.comments.push(newComment)
     await tweet.save()
     console.log(tweet)

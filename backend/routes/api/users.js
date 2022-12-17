@@ -57,8 +57,6 @@ router.post('/login', validateLoginInput, async (req, res, next) => {
 
 
     const user = await User.findOne({ email: email })
-    console.log(user)
-    console.log(!user)
 
     if (!user) {
         const err = {}
