@@ -6,11 +6,6 @@ const CommentSchema = new Schema({
         type: String,
         required: true
     },
-    tweet: {
-        type: Schema.Types.ObjectId,
-        ref: 'tweets',
-        required: true
-    },
     date: {
         type: Date,
         default: Date.now

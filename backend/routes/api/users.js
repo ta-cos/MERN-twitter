@@ -55,7 +55,10 @@ router.post('/register', validateRegisterInput, async (req, res, next) => {
 router.post('/login', validateLoginInput, async (req, res, next) => {
     const { email, password } = req.body
 
-    const user = await User.findOne({ email })
+
+    const user = await User.findOne({ email: email })
+    console.log(user)
+    console.log(!user)
 
     if (!user) {
         const err = {}
@@ -63,22 +66,23 @@ router.post('/login', validateLoginInput, async (req, res, next) => {
         err.title = 'Validation Error'
         err.errors = [`The email ${email} is not associated with a user`]
         next(err)
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password)
-
-    if (isMatch) {
-        await setTokenCookie(res, user);
-
-        return res.json({
-            user: user
-        });
     } else {
-        const err = {}
-        err.status = 400
-        err.title = 'Validation Error'
-        err.errors = [`Login information does not match our records`]
-        next(err)
+
+        const isMatch = await bcrypt.compare(password, user.password)
+
+        if (isMatch) {
+            await setTokenCookie(res, user);
+
+            return res.json({
+                user: user
+            });
+        } else {
+            const err = {}
+            err.status = 400
+            err.title = 'Validation Error'
+            err.errors = [`Login information does not match our records`]
+            next(err)
+        }
     }
 
 })
