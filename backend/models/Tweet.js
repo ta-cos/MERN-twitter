@@ -14,10 +14,11 @@ const TweetSchema = new Schema({
         type: Date,
         default: Date.now
     },
-    comment: {
-        type: Schema.Types.ObjectId,
-        ref: 'comments'
+    comments: {
+        type: Array,
+        default: []
     },
 });
 
-module.exports = Tweet = mongoose.model('Tweet', TweetSchema);
+const Tweet = mongoose.model('Tweet', TweetSchema);
+module.exports = Tweet

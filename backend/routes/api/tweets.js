@@ -30,8 +30,8 @@ router.get('/', async (req, res, next) => {
     return res.json(tweets)
 });
 
-router.get('/user/:userId', async (req, res, next) => {
-    const myTweets = await Tweet.find({ user: req.params.userId })
+router.get('/current', async (req, res, next) => {
+    const myTweets = await Tweet.find({ user: req.user.id })
 
     if (!myTweets) {
         const err = {}

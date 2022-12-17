@@ -5,9 +5,10 @@ const router = express.Router();
 
 router.post('/:tweetId', async (req, res, next) => {
     const tweetId = req.params.tweetId
+    console.log(tweetId)
     const tweet = await Tweet.findOne({ id: tweetId })
 
-    if (!tweet.length) return res.status(404).json({ error: 'Tweet not found' })
+    if (!tweet) return res.status(404).json({ error: 'Tweet not found' })
 
     const newComment = new Comment({
         text: req.body.text,
