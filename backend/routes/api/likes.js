@@ -95,18 +95,23 @@ router.delete('/tweets/:tweetId', requireAuth, async (req, res, next) => {
         err.status = 404
         err.errors = ["Tweet Not Found"]
         next(err)
-    } else if (req.user.id != tweet.user) {
-        err.title = 'Unathorized'
-        err.status = 401
-        err.errors = ["Unathorized"]
-        next(err)
     } else if (tweet.likeCount <= 0) {
         err.title = 'Bad Request'
-        err.status = 401
+        err.status = 400
         err.errors = ["No likes for this tweet yet"]
         next(err)
+    }
+
+    const isLiked = await Like.findOne({ user: req.user.id, tweet: tweet.id })
+
+    if (!isLiked) {
+        err.title = 'Bad Request'
+        err.status = 401
+        err.errors = ["This User does not like this comment"]
+        next(err)
     } else {
-        tweet.likeCount--;
+        await Like.deleteOne({ tweet: tweet.id, user: req.user.id })
+        tweet.likeCount--
         await tweet.save()
         res.json(tweet)
     }
@@ -129,19 +134,25 @@ router.delete('/comments/:commentId', requireAuth, async (req, res, next) => {
         err.status = 404
         err.errors = ["Comment Not Found"]
         return next(err)
-    } else if (comment.user != req.user.id) {
-        err.title = 'Unathorized'
-        err.status = 401
-        err.errors = ["Unathorized"]
-        return next(err)
     } else if (comment.likeCount <= 0) {
         err.title = 'Bad Request'
         err.status = 401
         err.errors = ["No likes for this comment yet"]
         next(err)
+    }
+
+    const isLiked = await Like.findOne({ user: req.user.id, comment: comment.id })
+
+    if (!isLiked) {
+        err.title = 'Bad Request'
+        err.status = 401
+        err.errors = ["This User does not like this comment"]
+        next(err)
     } else {
-        const deleted = await Comment.deleteOne({ _id: commentId })
-        return res.json(deleted)
+        await Like.deleteOne({ comment: comment.id, user: req.user.id })
+        comment.likeCount--
+        await comment.save()
+        return res.json({ message: 'Removed your like' })
     }
 })
 
