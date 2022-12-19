@@ -14,6 +14,10 @@ const TweetSchema = new Schema({
         type: Date,
         default: Date.now
     },
+    likeCount:{
+        type: Number,
+        default: 0
+    },
     comments: {
         type: Array,
         default: []

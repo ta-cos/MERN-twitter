@@ -11,7 +11,8 @@ const CommentSchema = new Schema({
         ref: 'users'
     },
     likeCount: {
-        type: Number
+        type: Number,
+        default: 0
     },
     date: {
         type: Date,
