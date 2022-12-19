@@ -2,7 +2,6 @@ const { setTokenCookie, requireAuth } = require('../../utils/auth');
 const validateRegisterInput = require('../../validation/register');
 const validateLoginInput = require('../../validation/login');
 const User = require('../../models/User');
-const keys = require('../../config/keys');
 const jwt = require('jsonwebtoken');
 const express = require('express');
 const bcrypt = require('bcryptjs');
