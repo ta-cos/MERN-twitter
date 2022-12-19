@@ -1,11 +1,12 @@
 const validateCommentInput = require('../../validation/comment');
+const { requireAuth } = require('../../utils/auth')
 const Comment = require('../../models/Comment')
 const Tweet = require('../../models/Tweet');
 const express = require('express');
 const router = express.Router();
 
 
-router.get('/current', async (req, res, next) => {
+router.get('/current', requireAuth, async (req, res, next) => {
     const myComments = await Comment.find({ user: req.user.id })
     if (!myComments.length) {
         const err = {}
@@ -16,7 +17,7 @@ router.get('/current', async (req, res, next) => {
     } else return res.json(myComments)
 })
 
-router.post('/:tweetId', validateCommentInput, async (req, res, next) => {
+router.post('/:tweetId', requireAuth, validateCommentInput, async (req, res, next) => {
     const err = {}
     const tweetId = req.params.tweetId
     const tweet = await Tweet.findById(tweetId)
@@ -46,7 +47,7 @@ router.post('/:tweetId', validateCommentInput, async (req, res, next) => {
     }
 })
 
-router.put('/:commentId', validateCommentInput, async (req, res, next) => {
+router.put('/:commentId', requireAuth, validateCommentInput, async (req, res, next) => {
     const err = {}
     const comment = await Comment.findById(req.params.commentId)
         .catch((e) => {
@@ -74,7 +75,7 @@ router.put('/:commentId', validateCommentInput, async (req, res, next) => {
     }
 })
 
-router.delete('/:commentId', async (req, res, next) => {
+router.delete('/:commentId', requireAuth, async (req, res, next) => {
     const err = {}
     const { commentId } = req.params
     const comment = await Comment.findById(commentId)
