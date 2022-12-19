@@ -1,3 +1,4 @@
+const validateCommentInput = require('../../validation/tweets');
 const Comment = require('../../models/Comment')
 const Tweet = require('../../models/Tweet');
 const express = require('express');
@@ -15,7 +16,7 @@ router.get('/current', async (req, res, next) => {
     } else return res.json(myComments)
 })
 
-router.post('/:tweetId', async (req, res, next) => {
+router.post('/:tweetId', validateCommentInput, async (req, res, next) => {
     const err = {}
     const tweetId = req.params.tweetId
     const tweet = await Tweet.findById(tweetId)
@@ -44,7 +45,7 @@ router.post('/:tweetId', async (req, res, next) => {
     }
 })
 
-router.put('/:commentId', async (req, res, next) => {
+router.put('/:commentId', validateCommentInput, async (req, res, next) => {
     const err = {}
     const comment = await Comment.findById(req.params.commentId)
         .catch((e) => {
@@ -84,8 +85,12 @@ router.delete('/:commentId', async (req, res, next) => {
         err.status = 404
         err.errors = ["Comment Not Found"]
         return next(err)
-    }
-    else {
+    } else if (comment.user !== req.user.id) {
+        err.title = 'Unathorized'
+        err.status = 401
+        err.errors = ["Unathorized"]
+        next(err)
+    } else {
         const deleted = await Comment.deleteOne({ _id: commentId })
         return res.json(deleted)
     }

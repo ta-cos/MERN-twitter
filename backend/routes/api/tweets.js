@@ -68,15 +68,16 @@ router.put('/:tweetId', validateTweetInput, async (req, res, next) => {
     const editTweet = await Tweet.findById(req.params.tweetId)
         .populate()
 
-    if (req.user.id != editTweet.user) {
-        err.title = 'Unathorized'
-        err.status = 401
-        err.errors = ["Unathorized"]
-        next(err)
-    } else if (!editTweet) {
+
+    if (!editTweet) {
         err.title = 'Not Found'
         err.status = 404
         err.errors = ["Tweet Not Found"]
+        next(err)
+    } else if (req.user.id != editTweet.user) {
+        err.title = 'Unathorized'
+        err.status = 401
+        err.errors = ["Unathorized"]
         next(err)
     } else {
         editTweet.text = req.body.text
