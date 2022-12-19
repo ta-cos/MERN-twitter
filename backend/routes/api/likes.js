@@ -1,6 +1,7 @@
 const { requireAuth } = require('../../utils/auth')
 const Comment = require('../../models/Comment')
 const Tweet = require('../../models/Tweet');
+const Like = require('../../models/Like')
 const express = require('express');
 const router = express.Router();
 
@@ -20,8 +21,21 @@ router.post('/tweets/:tweetId', requireAuth, async (req, res, next) => {
         err.title = 'Not Found'
         err.status = 404
         err.errors = ["Tweet Not Found"]
-        return next(err)
+        next(err)
+    }
+
+    const isAlreadyLiked = await Like.findOne({ tweet: tweet.id, user: req.user.id })
+
+    if (isAlreadyLiked) {
+        err.title = 'Bad Request'
+        err.status = 400
+        err.errors = ["User Already Likes This Tweet"]
+        next(err)
     } else {
+        await Like.create({
+            user: req.user.id,
+            tweet: tweet.id
+        })
         tweet.likeCount++
         await tweet.save()
         res.json(tweet)
@@ -39,21 +53,33 @@ router.post('/comments/:commentId', requireAuth, async (req, res, next) => {
             err.errors = ["Invalid Comment Id"]
             return next(err)
         })
-        console.log('*******************')
-    console.log(comment)
+
     if (!comment) {
         err.title = 'Comment Not Found'
         err.status = 404
         err.errors = ["Comment Not Found"]
-        return next(err)
+        next(err)
+    }
+
+    const isAlreadyLiked = await Like.findOne({ comment: comment.id, user: req.user.id })
+
+    if (isAlreadyLiked) {
+        err.title = 'Bad Request'
+        err.status = 400
+        err.errors = ["User Already Likes This Coment"]
+        next(err)
     } else {
+        await Like.create({
+            user: req.user.id,
+            comment: comment.id
+        })
         comment.likeCount++
         await comment.save()
         return res.json(comment)
     }
 })
 
-router.delete('/:tweetId', requireAuth, async (req, res, next) => {
+router.delete('/tweets/:tweetId', requireAuth, async (req, res, next) => {
     const err = {}
     const tweet = await Tweet.findById(req.params.tweetId)
         .catch((e) => {
@@ -86,7 +112,7 @@ router.delete('/:tweetId', requireAuth, async (req, res, next) => {
     }
 })
 
-router.delete('/:commentId', requireAuth, async (req, res, next) => {
+router.delete('/comments/:commentId', requireAuth, async (req, res, next) => {
     const err = {}
     const { commentId } = req.params
     const comment = await Comment.findById(commentId)
