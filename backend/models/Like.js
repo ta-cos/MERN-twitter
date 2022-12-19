@@ -14,6 +14,9 @@ const LikeSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'tweets'
     },
+    likeCount: {
+        type: Number
+    },
     date: {
         type: Date,
         default: Date.now
