@@ -91,11 +91,11 @@ router.delete('/:commentId', async (req, res, next) => {
         err.status = 404
         err.errors = ["Comment Not Found"]
         return next(err)
-    } else if (comment.user !== req.user.id) {
+    } else if (comment.user != req.user.id) {
         err.title = 'Unathorized'
         err.status = 401
         err.errors = ["Unathorized"]
-        next(err)
+        return next(err)
     } else {
         const deleted = await Comment.deleteOne({ _id: commentId })
         return res.json(deleted)
