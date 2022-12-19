@@ -1,10 +1,11 @@
 const validateTweetInput = require('../../validation/tweets');
+const { requireAuth } = require('../../utils/auth')
 const Tweet = require('../../models/Tweet');
 const express = require('express');
 const router = express.Router();
 
 //Routes are ordered by by test specs
-router.post('/', validateTweetInput, async (req, res, next) => {
+router.post('/', requireAuth, validateTweetInput, async (req, res, next) => {
 
     const tweet = await Tweet.create({
         text: req.body.text,
@@ -29,7 +30,7 @@ router.get('/', async (req, res, next) => {
     }
 });
 
-router.get('/current', async (req, res, next) => {
+router.get('/current', requireAuth, async (req, res, next) => {
     const myTweets = await Tweet.find({ user: req.user.id })
         .populate()
 
@@ -63,7 +64,7 @@ router.get('/:tweetId', async (req, res, next) => {
     } else res.json(tweet)
 });
 
-router.put('/:tweetId', validateTweetInput, async (req, res, next) => {
+router.put('/:tweetId', requireAuth, validateTweetInput, async (req, res, next) => {
     const err = {}
     const editTweet = await Tweet.findById(req.params.tweetId)
         .populate()
@@ -86,7 +87,7 @@ router.put('/:tweetId', validateTweetInput, async (req, res, next) => {
     }
 })
 
-router.delete('/:tweetId', async (req, res, next) => {
+router.delete('/:tweetId', requireAuth, async (req, res, next) => {
     const err = {}
 
     const tweet = await Tweet.findById(req.params.tweetId)
