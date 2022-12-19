@@ -4,7 +4,7 @@ const Tweet = require('../../models/Tweet');
 const express = require('express');
 const router = express.Router();
 
-router.post('/:tweetId', requireAuth, async (req, res, next) => {
+router.post('/tweets/:tweetId', requireAuth, async (req, res, next) => {
     const err = {}
     const tweet = await Tweet.findById(req.params.tweetId)
         .populate()
@@ -29,7 +29,7 @@ router.post('/:tweetId', requireAuth, async (req, res, next) => {
 
 })
 
-router.post('/:commentId', requireAuth, async (req, res, next) => {
+router.post('/comments/:commentId', requireAuth, async (req, res, next) => {
     const err = {}
     const comment = await Comment.findById(req.params.commentId)
         .catch((e) => {
@@ -39,7 +39,8 @@ router.post('/:commentId', requireAuth, async (req, res, next) => {
             err.errors = ["Invalid Comment Id"]
             return next(err)
         })
-
+        console.log('*******************')
+    console.log(comment)
     if (!comment) {
         err.title = 'Comment Not Found'
         err.status = 404
