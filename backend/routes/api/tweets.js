@@ -3,7 +3,7 @@ const Tweet = require('../../models/Tweet');
 const express = require('express');
 const router = express.Router();
 
-//Routes are ordered by by test spec
+//Routes are ordered by by test specs
 router.post('/', validateTweetInput, async (req, res, next) => {
 
     const tweet = await Tweet.create({
@@ -18,16 +18,15 @@ router.get('/', async (req, res, next) => {
     const tweets = await Tweet.find()
         .sort({ date: -1 })
 
-
     if (!tweets.length) {
         const err = {}
         err.title = 'No Data Found'
         err.status = '404'
         err.erros = ['no tweets at this time']
         next(err)
+    } else {
+        return res.json(tweets)
     }
-
-    return res.json(tweets)
 });
 
 router.get('/current', async (req, res, next) => {
@@ -68,11 +67,11 @@ router.put('/:tweetId', validateTweetInput, async (req, res, next) => {
     const err = {}
     const editTweet = await Tweet.findById(req.params.tweetId)
         .populate()
-    console.log(editTweet.user)
-    if (req.user.id == editTweet.user) {
-        err.title = 'Not Found'
-        err.status = 404
-        err.errors = ["Tweet Not Found"]
+
+    if (req.user.id != editTweet.user) {
+        err.title = 'Unathorized'
+        err.status = 401
+        err.errors = ["Unathorized"]
         next(err)
     } else if (!editTweet) {
         err.title = 'Not Found'
@@ -82,7 +81,6 @@ router.put('/:tweetId', validateTweetInput, async (req, res, next) => {
     } else {
         editTweet.text = req.body.text
         await editTweet.save()
-        console.log(editTweet)
         return res.json(editTweet)
     }
 })
