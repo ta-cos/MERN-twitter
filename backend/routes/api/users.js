@@ -2,7 +2,6 @@ const { setTokenCookie, requireAuth } = require('../../utils/auth');
 const validateRegisterInput = require('../../validation/register');
 const validateLoginInput = require('../../validation/login');
 const User = require('../../models/User');
-const keys = require('../../config/keys');
 const jwt = require('jsonwebtoken');
 const express = require('express');
 const bcrypt = require('bcryptjs');
@@ -55,7 +54,8 @@ router.post('/register', validateRegisterInput, async (req, res, next) => {
 router.post('/login', validateLoginInput, async (req, res, next) => {
     const { email, password } = req.body
 
-    const user = await User.findOne({ email })
+
+    const user = await User.findOne({ email: email })
 
     if (!user) {
         const err = {}
@@ -63,22 +63,23 @@ router.post('/login', validateLoginInput, async (req, res, next) => {
         err.title = 'Validation Error'
         err.errors = [`The email ${email} is not associated with a user`]
         next(err)
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password)
-
-    if (isMatch) {
-        await setTokenCookie(res, user);
-
-        return res.json({
-            user: user
-        });
     } else {
-        const err = {}
-        err.status = 400
-        err.title = 'Validation Error'
-        err.errors = [`Login information does not match our records`]
-        next(err)
+
+        const isMatch = await bcrypt.compare(password, user.password)
+
+        if (isMatch) {
+            await setTokenCookie(res, user);
+
+            return res.json({
+                user: user
+            });
+        } else {
+            const err = {}
+            err.status = 400
+            err.title = 'Validation Error'
+            err.errors = [`Login information does not match our records`]
+            next(err)
+        }
     }
 
 })

@@ -3,51 +3,118 @@ const Tweet = require('../../models/Tweet');
 const express = require('express');
 const router = express.Router();
 
-router.get('/', (req, res) => {
-    Tweet.find()
-        .sort({ date: -1 })
-        .then(tweets => res.json(tweets))
-        .catch(err => res.status(404).json({ notweetsfound: 'No tweets found' }));
-});
+//Routes are ordered by by test specs
+router.post('/', validateTweetInput, async (req, res, next) => {
 
-router.post('/', validateTweetInput, (req, res, next) => {
-
-    const newTweet = new Tweet({
+    const tweet = await Tweet.create({
         text: req.body.text,
         user: req.user.id
     });
-    newTweet.save().then(tweet => res.json(tweet));
+
+    return res.json(tweet)
 });
 
-router.get('/user/:user_id', (req, res) => {
-    Tweet.find({ user: req.params.user_id })
-        .then(tweets => res.json(tweets))
-        .catch(err =>
-            res.status(404).json({ notweetsfound: 'No tweets found from that user' }
-            )
-        );
+router.get('/', async (req, res, next) => {
+    const tweets = await Tweet.find()
+        .sort({ date: -1 })
+
+    if (!tweets.length) {
+        const err = {}
+        err.title = 'No Data Found'
+        err.status = '404'
+        err.erros = ['no tweets at this time']
+        next(err)
+    } else {
+        return res.json(tweets)
+    }
 });
 
-router.get('/:id', (req, res) => {
-    Tweet.findById(req.params.id)
-        .then(tweet => res.json(tweet))
-        .catch(err =>
-            res.status(404).json({ notweetfound: 'No tweet found with that ID' })
-        );
+router.get('/current', async (req, res, next) => {
+    const myTweets = await Tweet.find({ user: req.user.id })
+        .populate()
+
+    if (!myTweets) {
+        const err = {}
+        err.title = 'Not Found'
+        err.status = 404
+        err.errors = ["You don't have any tweets yet"]
+        next(err)
+    } else return res.json(myTweets)
 });
 
-router.put('/:id', validateTweetInput, async (req, res, next) => {
-    const query = { id: req.params.id }
-    const editTweet = await Tweet.findOneAndUpdate(query,
-        {
-            text: req.body.text,
-        });
-    if (!editTweet) res.status(404).json("Comment not found")
-    res.json({ message: "Successfully Updated Tweet" })
+router.get('/:tweetId', async (req, res, next) => {
+    const err = {}
+
+    const tweet = await Tweet.findById(req.params.tweetId)
+        .populate()
+        .catch((e) => {
+            err.title = 'Bad Request'
+            err.message = e.message
+            err.status = 400
+            err.errors = ["Invalid Tweet Id"]
+            next(err)
+        })
+    //.catch will catch any erreros that arise becuase of type casting for findById
+    if (!tweet) {
+        err.title = 'Not Found'
+        err.status = 404
+        err.errors = ["Tweet Not Found"]
+        next(err)
+    } else res.json(tweet)
+});
+
+router.put('/:tweetId', validateTweetInput, async (req, res, next) => {
+    const err = {}
+    const editTweet = await Tweet.findById(req.params.tweetId)
+        .populate()
+
+
+    if (!editTweet) {
+        err.title = 'Not Found'
+        err.status = 404
+        err.errors = ["Tweet Not Found"]
+        next(err)
+    } else if (req.user.id != editTweet.user) {
+        err.title = 'Unathorized'
+        err.status = 401
+        err.errors = ["Unathorized"]
+        next(err)
+    } else {
+        editTweet.text = req.body.text
+        await editTweet.save()
+        return res.json(editTweet)
+    }
 })
 
-router.delete(':/id', async (req, res, next) => {
+router.delete('/:tweetId', async (req, res, next) => {
+    const err = {}
 
+    const tweet = await Tweet.findById(req.params.tweetId)
+        .catch((e) => {
+            err.title = 'Bad Request'
+            err.message = e.message
+            err.status = 400
+            err.errors = ["Invalid Tweet Id"]
+            next(err)
+        })
+
+    if (!tweet) {
+        err.title = 'Not Found'
+        err.status = 404
+        err.errors = ["Tweet Not Found"]
+        next(err)
+    } else if (req.user.id != tweet.user) {
+        err.title = 'Unathorized'
+        err.status = 401
+        err.errors = ["Unathorized"]
+        next(err)
+    } else {
+        const deleteTweet = await Tweet.deleteOne({
+            id: req.params.id,
+        })
+        return res.json(deleteTweet)
+    }
 })
+
 
 module.exports = router;

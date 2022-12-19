@@ -45,11 +45,9 @@ const restoreUser = (req, res, next) => {
         }
 
         try {
-            console.log(User)
             const { id } = jwtPayload.data;
             req.user = await User.findById(id);
         } catch (e) {
-            console.log(e)
             res.clearCookie('token');
             return next();
         }
