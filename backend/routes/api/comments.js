@@ -1,4 +1,4 @@
-const validateCommentInput = require('../../validation/tweets');
+const validateCommentInput = require('../../validation/comment');
 const Comment = require('../../models/Comment')
 const Tweet = require('../../models/Tweet');
 const express = require('express');
@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.get('/current', async (req, res, next) => {
     const myComments = await Comment.find({ user: req.user.id })
-    if (!myComments) {
+    if (!myComments.length) {
         const err = {}
         err.title = 'Not Found'
         err.status = 404
@@ -36,7 +36,8 @@ router.post('/:tweetId', validateCommentInput, async (req, res, next) => {
     } else {
         const newComment = await Comment.create({
             text: req.body.text,
-            tweet: tweetId
+            tweet: tweetId,
+            user: req.user.id
         });
 
         tweet.comments.push(newComment)
@@ -61,6 +62,11 @@ router.put('/:commentId', validateCommentInput, async (req, res, next) => {
         err.status = 404
         err.errors = ["Comment Not Found"]
         return next(err)
+    } else if (comment.user != req.user.id) {
+        err.title = 'Unathorized'
+        err.status = 401
+        err.errors = ["Unathorized"]
+        next(err)
     } else {
         comment.text = req.body.text
         await comment.save()

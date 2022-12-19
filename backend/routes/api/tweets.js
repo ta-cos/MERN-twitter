@@ -103,6 +103,11 @@ router.delete('/:tweetId', async (req, res, next) => {
         err.status = 404
         err.errors = ["Tweet Not Found"]
         next(err)
+    } else if (req.user.id != tweet.user) {
+        err.title = 'Unathorized'
+        err.status = 401
+        err.errors = ["Unathorized"]
+        next(err)
     } else {
         const deleteTweet = await Tweet.deleteOne({
             id: req.params.id,

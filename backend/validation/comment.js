@@ -9,7 +9,7 @@ module.exports = function validateCommentInput(req, res, next) {
     data.text = validText(text) ? text : '';
 
     if (!Validator.isLength(data.text, { min: 5, max: 250 })) {
-        err.errors.push('Tweet must be between 5 and 140 characters');
+        err.errors.push('Comment must be between 5 and 250 characters');
     }
 
     if (Validator.isEmpty(data.text)) {
