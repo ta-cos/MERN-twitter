@@ -6,7 +6,6 @@ const router = express.Router();
 
 router.get('/current', async (req, res, next) => {
     const myComments = await Comment.find({ user: req.user.id })
-    console.log(myComments)
     if (!myComments) {
         const err = {}
         err.title = 'Not Found'
@@ -41,14 +40,13 @@ router.post('/:tweetId', async (req, res, next) => {
 
         tweet.comments.push(newComment)
         await tweet.save()
-        console.log(tweet)
-        res.json(newComment)
+        return res.json(newComment)
     }
 })
 
 router.put('/:commentId', async (req, res, next) => {
     const err = {}
-    const comment = Comment.findById(req.params.commentId)
+    const comment = await Comment.findById(req.params.commentId)
         .catch((e) => {
             err.title = 'Bad Request'
             err.message = e.message
@@ -63,20 +61,33 @@ router.put('/:commentId', async (req, res, next) => {
         err.errors = ["Comment Not Found"]
         return next(err)
     } else {
-        console.log(comment)
         comment.text = req.body.text
         await comment.save()
-        res.json(comment)
+        return res.json(comment)
     }
 })
 
-router.delete('/:id', async (req, res, next) => {
-    const query = { id: req.params.id }
-    const comment = await Comment.find(query)
-    if (!comment.length) return res.status(404).json({ error: 'Comment Not Found' })
+router.delete('/:commentId', async (req, res, next) => {
+    const err = {}
+    const { commentId } = req.params
+    const comment = await Comment.findById(commentId)
+        .catch((e) => {
+            err.title = 'Bad Request'
+            err.message = e.message
+            err.status = 400
+            err.errors = ["Invalid Comment Id"]
+            return next(err)
+        })
+
+    if (!comment) {
+        err.title = 'Comment Not Found'
+        err.status = 404
+        err.errors = ["Comment Not Found"]
+        return next(err)
+    }
     else {
-        await Comment.deleteOne(query)
-        res.json({ message: "Successfully Deleted comment" })
+        const deleted = await Comment.deleteOne({ _id: commentId })
+        return res.json(deleted)
     }
 })
 
