@@ -1,7 +1,10 @@
+import React from 'react'
+import WhatsHappening from './compnents/WhatsHappening/WhatsHappening'
+
 function App() {
   return (
-    <h1>Hello from App</h1>
-  );
+    <WhatsHappening />
+  )
 }
 
-export default App;
+export default App
