@@ -10,6 +10,10 @@ const CommentSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'users'
     },
+    likeCount: {
+        type: Number,
+        default: 0
+    },
     date: {
         type: Date,
         default: Date.now

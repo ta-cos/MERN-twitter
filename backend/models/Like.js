@@ -2,17 +2,17 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const LikeSchema = new Schema({
-    like: {
-        type: Boolean,
-        default: false
-    },
-    comment: {
+    user: {
         type: Schema.Types.ObjectId,
-        ref: 'comments'
+        ref: 'users'
     },
     tweet: {
         type: Schema.Types.ObjectId,
-        ref: 'tweets'
+        ref: 'tweet'
+    },
+    comment: {
+        type: Schema.Types.ObjectId,
+        ref: 'comment'
     },
     date: {
         type: Date,

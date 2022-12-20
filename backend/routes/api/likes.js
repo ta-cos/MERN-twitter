@@ -1,26 +1,159 @@
+const { requireAuth } = require('../../utils/auth')
+const Comment = require('../../models/Comment')
+const Tweet = require('../../models/Tweet');
+const Like = require('../../models/Like')
 const express = require('express');
 const router = express.Router();
 
+router.post('/tweets/:tweetId', requireAuth, async (req, res, next) => {
+    const err = {}
+    const tweet = await Tweet.findById(req.params.tweetId)
+        .populate()
+        .catch((e) => {
+            err.title = 'Bad Request'
+            err.message = e.message
+            err.status = 400
+            err.errors = ["Invalid Tweet Id"]
+            next(err)
+        })
 
+    if (!tweet) {
+        err.title = 'Not Found'
+        err.status = 404
+        err.errors = ["Tweet Not Found"]
+        next(err)
+    }
 
-router.post('api/test', function (req, res) {
-    res.json({ requestBody: req.body });
-});
+    const isAlreadyLiked = await Like.findOne({ tweet: tweet.id, user: req.user.id })
 
-router.get('/', (req, res) => {
-    res.json('Likes are Connected')
+    if (isAlreadyLiked) {
+        err.title = 'Bad Request'
+        err.status = 400
+        err.errors = ["User Already Likes This Tweet"]
+        next(err)
+    } else {
+        await Like.create({
+            user: req.user.id,
+            tweet: tweet.id
+        })
+        tweet.likeCount++
+        await tweet.save()
+        res.json(tweet)
+    }
+
 })
 
-router.post('/', (req, res, next) => {
+router.post('/comments/:commentId', requireAuth, async (req, res, next) => {
+    const err = {}
+    const comment = await Comment.findById(req.params.commentId)
+        .catch((e) => {
+            err.title = 'Bad Request'
+            err.message = e.message
+            err.status = 400
+            err.errors = ["Invalid Comment Id"]
+            return next(err)
+        })
 
+    if (!comment) {
+        err.title = 'Comment Not Found'
+        err.status = 404
+        err.errors = ["Comment Not Found"]
+        next(err)
+    }
+
+    const isAlreadyLiked = await Like.findOne({ comment: comment.id, user: req.user.id })
+
+    if (isAlreadyLiked) {
+        err.title = 'Bad Request'
+        err.status = 400
+        err.errors = ["User Already Likes This Coment"]
+        next(err)
+    } else {
+        await Like.create({
+            user: req.user.id,
+            comment: comment.id
+        })
+        comment.likeCount++
+        await comment.save()
+        return res.json(comment)
+    }
 })
 
-router.get('/', (req, res, next) => {
+router.delete('/tweets/:tweetId', requireAuth, async (req, res, next) => {
+    const err = {}
+    const tweet = await Tweet.findById(req.params.tweetId)
+        .catch((e) => {
+            err.title = 'Bad Request'
+            err.message = e.message
+            err.status = 400
+            err.errors = ["Invalid Tweet Id"]
+            next(err)
+        })
 
+    if (!tweet) {
+        err.title = 'Not Found'
+        err.status = 404
+        err.errors = ["Tweet Not Found"]
+        next(err)
+    } else if (tweet.likeCount <= 0) {
+        err.title = 'Bad Request'
+        err.status = 400
+        err.errors = ["No likes for this tweet yet"]
+        next(err)
+    }
+
+    const isLiked = await Like.findOne({ user: req.user.id, tweet: tweet.id })
+
+    if (!isLiked) {
+        err.title = 'Bad Request'
+        err.status = 401
+        err.errors = ["This User does not like this comment"]
+        next(err)
+    } else {
+        await Like.deleteOne({ tweet: tweet.id, user: req.user.id })
+        tweet.likeCount--
+        await tweet.save()
+        res.json(tweet)
+    }
 })
 
-router.delete('/:id', (req, res, next) => {
+router.delete('/comments/:commentId', requireAuth, async (req, res, next) => {
+    const err = {}
+    const { commentId } = req.params
+    const comment = await Comment.findById(commentId)
+        .catch((e) => {
+            err.title = 'Bad Request'
+            err.message = e.message
+            err.status = 400
+            err.errors = ["Invalid Comment Id"]
+            return next(err)
+        })
 
+    if (!comment) {
+        err.title = 'Comment Not Found'
+        err.status = 404
+        err.errors = ["Comment Not Found"]
+        return next(err)
+    } else if (comment.likeCount <= 0) {
+        err.title = 'Bad Request'
+        err.status = 401
+        err.errors = ["No likes for this comment yet"]
+        next(err)
+    }
+
+    const isLiked = await Like.findOne({ user: req.user.id, comment: comment.id })
+
+    if (!isLiked) {
+        err.title = 'Bad Request'
+        err.status = 401
+        err.errors = ["This User does not like this comment"]
+        next(err)
+    } else {
+        await Like.deleteOne({ comment: comment.id, user: req.user.id })
+        comment.likeCount--
+        await comment.save()
+        return res.json({ message: 'Removed your like' })
+    }
 })
 
 module.exports = router;
