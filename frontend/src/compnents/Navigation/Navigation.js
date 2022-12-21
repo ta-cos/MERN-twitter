@@ -1,8 +1,16 @@
+import { BrowserRouter, Route, Link } from 'react-router-dom';
 import React from 'react'
 
 function Navigation() {
     return (
-        <div>Navigation</div>
+        <nav>
+            <h1>Navigation</h1>
+            <ul>
+                <li>Home</li>
+                <li>Explore</li>
+                <li>Profile</li>
+            </ul>
+        </nav>
     )
 }
 

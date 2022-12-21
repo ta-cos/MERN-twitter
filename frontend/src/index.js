@@ -1,11 +1,30 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+import Home from './Home';
+import { BrowserRouter, Route } from 'react-router-dom';
+
+const Root = () => {
+  return (
+    <BrowserRouter>
+      <div>
+        <Route exact path="/">
+          <Home />
+        </Route>
+        <Route path="/explore">
+          <h1>Coming Soon</h1>
+        </Route>
+        <Route path="/profile">
+          <h1>Coming Soon</h1>
+        </Route>
+      </div>
+    </BrowserRouter>
+  );
+};
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Root />
   </React.StrictMode>,
-  document.getElementById('root')
+  document.getElementById('root'),
 );
