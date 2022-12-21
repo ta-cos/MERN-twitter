@@ -1,15 +1,13 @@
-import { BrowserRouter, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Route, Link, NavLink } from 'react-router-dom';
 import React from 'react'
+import './Navigation.css'
 
 function Navigation() {
     return (
-        <nav>
-            <h1>Navigation</h1>
-            <ul>
-                <li>Home</li>
-                <li>Explore</li>
-                <li>Profile</li>
-            </ul>
+        <nav className='nav-content'>
+            <li><NavLink to='/'>Home</NavLink></li>
+            <li><NavLink to='/explore'>Explore</NavLink></li>
+            <li><NavLink to='/profile'>Profile</NavLink></li>
         </nav>
     )
 }

@@ -2,7 +2,9 @@ import React from 'react'
 
 function Reccomendations() {
   return (
-    <div>Reccomendations</div>
+    <section>
+      <h2>Reccomendations</h2>
+    </section>
   )
 }
 

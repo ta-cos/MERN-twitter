@@ -7,7 +7,7 @@ import { BrowserRouter, Route } from 'react-router-dom';
 const Root = () => {
   return (
     <BrowserRouter>
-      <div>
+      <>
         <Route exact path="/">
           <Home />
         </Route>
@@ -17,7 +17,7 @@ const Root = () => {
         <Route path="/profile">
           <h1>Coming Soon</h1>
         </Route>
-      </div>
+      </>
     </BrowserRouter>
   );
 };
